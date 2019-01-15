@@ -13,7 +13,7 @@ from keras.layers import Dense, Activation
 
 def train():
     env = SimulationRobobo()
-    env.connect(address='192.168.1.135', port=19997)
+    env.connect(address='130.37.154.254', port=19997)
 
     try:
         model = load_model('model_ir.hdf5')
@@ -23,7 +23,7 @@ def train():
         model.add(Activation("relu"))
         model.add(Dense(units=6))
         model.add(Activation("relu"))
-        model.add(Dense(units=3))
+        model.add(Dense(units=4))
         model.add(Activation("relu"))
         model.compile(optimizer='Adam', loss='mse')
 
@@ -32,18 +32,21 @@ def train():
     e = 0.1
     num_episodes = 1500
     num_steps = 300
+
     # create lists to contain total rewards and steps per episode
     jList = []
     rList = []
     lList = []
-    SPEED = 100
+    SPEED = 10
 
+    # train in i environments
     for i in range(num_episodes):
-        # Reset environment and get first new observation
+        # Reset environment 
         env.reset()
 
+        # make first move and obtain observations and reward
         observations, reward = env.move(SPEED, SPEED)
-        obervations = observations['ir_sensor'].reshape((1, -1))
+        observations = np.asarray(observations['ir_sensor']).reshape((1, -1))
         reward = reward['ir_sensor']
 
         Q = model.predict(observations)
@@ -60,6 +63,7 @@ def train():
             Q = model.predict(observations)
             action = Q.argmax()
 
+            # small chance at random action
             if np.random.rand(1) < e:
                 action = np.random.randint(3)
                 print("e = {}. Choosing Random Action: {}".format(e, action))
@@ -82,7 +86,7 @@ def train():
                 right = 0
 
             s_observations, r_reward = env.move(left, right)
-            s_observations = s_observations['ir_sensor'].reshape((1, -1))
+            s_observations = np.asarray(s_observations['ir_sensor']).reshape((1, -1))
             r_reward = r_reward['ir_sensor']
 
             # Obtain the Q' values by feeding the new state through our network

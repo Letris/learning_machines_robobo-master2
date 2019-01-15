@@ -138,16 +138,22 @@ class SimulationRobobo(Robobo):
         # Get observations
         observations = {}
         observations['ir_sensor'] = self.read_irs()
-
+        print(observations['ir_sensor'])
         # Assign reward
         reward = {}
 
-        #ToDO define rewards 
-        if (observations['ir_sensor'][[0,1,2,3,4,5,6,7]] == 0).all():
-            reward['light_sensor'] = 5
+        # ToDO define rewards 
+        for observation in observations['ir_sensor']:
+            if observation > 0:
+                reward['ir_sensor'] = -5
+            else:
+                reward['ir_sensor'] = 5
 
-        if (observations['ir_sensor'][[3, 4]] > 0).any():
-            reward['light_sensor'] = -2
+        # if (observations['ir_sensor'][0,1,2,3,4,5,6,7] == 0).all():
+        #     reward['ir_sensor'] = 5
+
+        # if (observations['ir_sensor'][3, 4] > 0).any():
+        #     reward['ir_sensor'] = -2
 
         return observations, reward
 
